@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NOVA ULTIMATE COMPLETE | ALLAWI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --neon: #ff0000; --bg: #000; --glass: rgba(15, 0, 0, 0.95); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Courier New', monospace; }
+        body, html { margin: 0; padding: 0; height: 100vh; background: var(--bg); color: #fff; overflow: hidden; }
+
+        /* Grid Background v14 */
+        .grid { position: fixed; width: 200%; height: 200%; background-image: linear-gradient(var(--neon) 1px, transparent 1px), linear-gradient(90deg, var(--neon) 1px, transparent 1px); background-size: 45px 45px; opacity: 0.05; transform: perspective(500px) rotateX(60deg); z-index: -1; animation: gridAnim 10s linear infinite; }
+        @keyframes gridAnim { from { transform: perspective(500px) rotateX(60deg) translateY(0); } to { transform: perspective(500px) rotateX(60deg) translateY(45px); } }
+
+        .app { display: flex; flex-direction: column; height: 100vh; position: relative; }
+        header { height: 50px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; background: #000; box-shadow: 0 0 15px var(--neon); z-index: 1000; }
+
+        .view-port { flex: 1; position: relative; overflow: hidden; }
+        .page { position: absolute; width: 100%; height: 100%; display: none; padding: 20px; flex-direction: column; align-items: center; justify-content: center; }
+        .page.active { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Fixed Radial Visualizer (v18 Solution) */
+        canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+        .core-circle { width: 130px; height: 130px; border: 5px solid var(--neon); border-radius: 50%; background: #000; z-index: 10; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px var(--neon); font-size: 1.6rem; font-weight: 900; transition: 0.1s; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+        /* DB & LAB Panels (v17 Style) */
+        .glass-box { width: 100%; height: 85%; background: var(--glass); border: 1px solid var(--neon); border-radius: 15px; overflow-y: auto; padding: 10px; }
+        .track { padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
+        .track.active { color: var(--neon); background: rgba(255,0,0,0.1); border-left: 4px solid var(--neon); }
+
+        .lab-item { background: #080000; border: 1px solid var(--neon); padding: 15px; border-radius: 10px; margin-bottom: 15px; width: 100%; }
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 5px; background: #333; margin-top: 10px; border-radius: 5px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 10px var(--neon); cursor: pointer; }
+
+        /* Player Controls v17 (Seek Bar Fix) */
+        .controls-panel { padding: 10px 20px; background: #000; border-top: 1px solid #222; z-index: 100; }
+        .info-bar { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--neon); margin-bottom: 5px; font-weight: bold; }
+        .seek-container { width: 100%; margin-bottom: 10px; }
+
+        .btn-group { display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 5px; }
+        .p-btn { background: none; border: none; color: #fff; font-size: 1.8rem; }
+
+        nav { height: 80px; border-top: 2px solid var(--neon); display: flex; justify-content: space-around; align-items: center; background: #000; }
+        .nav-i { background: none; border: none; color: #444; font-size: 1.3rem; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
+        .nav-i.active { color: var(--neon); filter: drop-shadow(0 0 8px var(--neon)); transform: scale(1.1); }
+
+        .add-fab { position: fixed; bottom: 100px; right: 25px; background: var(--neon); color: #000; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px var(--neon); z-index: 2000; font-size: 1.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="grid"></div>
+
+<div class="app">
+    <header>
+        <div id="status">NOVA_OS_ULTIMATE</div>
+        <div id="clock">00:00:00</div>
+    </header>
+
+    <div class="view-port">
+        <div class="page active" id="pg-core">
+            <canvas id="cvs"></canvas>
+            <div class="core-circle" id="node">NOVA</div>
+        </div>
+
+        <div class="page" id="pg-db">
+            <div class="glass-box" id="list"></div>
+        </div>
+
+        <div class="page" id="pg-lab" style="overflow-y:auto;">
+            <div class="lab-item">
+                <label>BASS_BOOST: <span id="bv">0</span>dB</label>
+                <input type="range" id="bc" min="0" max="35" value="0">
+            </div>
+            <div class="lab-item">
+                <label>SPEED: <span id="sv">1.0</span>x</label>
+                <input type="range" id="sc" min="0.5" max="2.0" step="0.1" value="1.0">
+            </div>
+            <div class="lab-item">
+                <label>8D_SURROUND: <span id="8dv">OFF</span></label>
+                <input type="range" id="8dc" min="0" max="1" step="0.1" value="0">
+            </div>
+            <div class="lab-item">
+                <label>THEMES:</label>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <div onclick="setT('#ff0000')" style="background:#ff0000; width:40px; height:40px; border-radius:5px;"></div>
+                    <div onclick="setT('#00ff00')" style="background:#00ff00; width:40px; height:40px; border-radius:5px;"></div>
+                    <div onclick="setT('#0088ff')" style="background:#0088ff; width:40px; height:40px; border-radius:5px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls-panel">
+        <div class="info-bar">
+            <span id="s-name">AWAITING_FILES_</span>
+            <span id="s-time">00:00 / 00:00</span>
+        </div>
+        <div class="seek-container">
+            <input type="range" id="main-seek" value="0" step="0.1">
+        </div>
+        <div class="btn-group">
+            <button class="p-btn" id="prev"><i class="fas fa-step-backward"></i></button>
+            <button class="p-btn" id="play" style="font-size:2.5rem;"><i class="fas fa-play"></i></button>
+            <button class="p-btn" id="next"><i class="fas fa-step-forward"></i></button>
+        </div>
+    </div>
+
+    <nav>
+        <button class="nav-i active" data-p="pg-core"><i class="fas fa-atom"></i><span>CORE</span></button>
+        <button class="nav-i" data-p="pg-db"><i class="fas fa-database"></i><span>DB</span></button>
+        <button class="nav-i" data-p="pg-lab"><i class="fas fa-flask"></i><span>LAB</span></button>
+    </nav>
+
+    <label class="add-fab"><i class="fas fa-plus"></i><input type="file" id="f-in" hidden multiple accept="audio/*"></label>
+</div>
+
+<script>
+    const audio = new Audio();
+    const cvs = document.getElementById('cvs'), ctx = cvs.getContext('2d');
+    const playBtn = document.getElementById('play'), mainSeek = document.getElementById('main-seek');
+    const node = document.getElementById('node'), sName = document.getElementById('s-name'), sTime = document.getElementById('s-time');
+    let audioCtx, analyser, source, dataArray, bassNode, pannerNode;
+    let playlist = [], curIdx = 0, spatialDeg = 0;
+
+    // --- AI Voice ---
+    const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(Rec){
+        const rec = new Rec(); rec.continuous = true; rec.lang = 'ar-SA';
+        rec.onresult = (e) => {
+            const cmd = e.results[e.results.length-1][0].transcript;
+            if(cmd.includes("نوفا")) { const m = new SpeechSynthesisUtterance("نعم مطور علاوي"); m.lang='ar-SA'; window.speechSynthesis.speak(m); }
+        };
+        document.body.onclick = () => { try{rec.start()}catch(e){} };
+    }
+
+    // --- Shake ---
+    let lastS = 0;
+    window.addEventListener('devicemotion', (e) => {
+        let acc = e.accelerationIncludingGravity;
+        if(Math.abs(acc.x) + Math.abs(acc.y) > 30){
+            let now = Date.now(); if(now - lastS > 1000){ playN(); lastS = now; }
+        }
+    });
+
+    // --- Navigation ---
+    document.querySelectorAll('.nav-i').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.nav-i, .page').forEach(x => x.classList.remove('active'));
+            btn.classList.add('active'); document.getElementById(btn.dataset.p).classList.add('active');
+        };
+    });
+
+    // --- Engine ---
+    document.getElementById('f-in').onchange = (e) => {
+        const files = Array.from(e.target.files);
+        playlist = [...playlist, ...files];
+        render(); if(audio.paused) playT(playlist.length - files.length);
+    };
+
+    function render() {
+        document.getElementById('list').innerHTML = playlist.map((f, i) => `
+            <div class="track ${i===curIdx?'active':''}" onclick="playT(${i})">
+                <span>${f.name.slice(0,25)}...</span> <i class="fas fa-play-circle"></i>
+            </div>`).join('');
+    }
+
+    function playT(i) {
+        curIdx = i; audio.src = URL.createObjectURL(playlist[i]);
+        sName.innerText = playlist[i].name; audio.play();
+        playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        render(); if(!audioCtx) initAudio();
+    }
+
+    function initAudio() {
+        audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser(); source = audioCtx.createMediaElementSource(audio);
+        bassNode = audioCtx.createBiquadFilter(); bassNode.type = "lowshelf";
+        pannerNode = audioCtx.createPanner(); pannerNode.panningModel = 'HRTF';
+        source.connect(bassNode); bassNode.connect(pannerNode); pannerNode.connect(analyser); analyser.connect(audioCtx.destination);
+        dataArray = new Uint8Array(analyser.frequencyBinCount); loop();
+    }
+
+    function loop() {
+        requestAnimationFrame(loop); if(!analyser) return;
+        analyser.getByteFrequencyData(dataArray); ctx.clearRect(0,0,cvs.width,cvs.height);
+        const b = dataArray[2]/255;
+        node.style.transform = `translate(-50%, -50%) scale(${1 + b*0.35})`;
+        node.style.boxShadow = `0 0 ${40 + b*80}px var(--neon)`;
+
+        if(document.getElementById('8dc').value > 0){
+            spatialDeg += 0.05; pannerNode.setPosition(Math.sin(spatialDeg)*5, 0, Math.cos(spatialDeg)*5);
+        }
+
+        // --- RADIAL VISUALIZER FIX ---
+        const cx = cvs.width/2, cy = cvs.height/2;
+        ctx.beginPath(); ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--neon');
+        ctx.lineWidth = 3;
+        for(let i=0; i<dataArray.length; i+=2){
+            const angle = (i/dataArray.length) * Math.PI * 2;
+            const r = 65 + b*10;
+            const h = (dataArray[i]/255) * 80;
+            ctx.moveTo(cx + Math.cos(angle)*r, cy + Math.sin(angle)*r);
+            ctx.lineTo(cx + Math.cos(angle)*(r+h), cy + Math.sin(angle)*(r+h));
+        }
+        ctx.stroke();
+    }
+
+    // --- Controls ---
+    playBtn.onclick = () => { audio.paused?audio.play():audio.pause(); playBtn.innerHTML=audio.paused?'<i class="fas fa-play"></i>':'<i class="fas fa-pause"></i>'; };
+    document.getElementById('next').onclick = playN;
+    document.getElementById('prev').onclick = () => { curIdx > 0 ? playT(curIdx-1) : playT(playlist.length-1); };
+    
+    function playN() { if(curIdx < playlist.length-1) playT(curIdx+1); else playT(0); }
+    
+    audio.ontimeupdate = () => {
+        if(!isNaN(audio.duration)){
+            mainSeek.max = audio.duration; mainSeek.value = audio.currentTime;
+            let m=Math.floor(audio.currentTime/60), s=Math.floor(audio.currentTime%60);
+            let dm=Math.floor(audio.duration/60), ds=Math.floor(audio.duration%60);
+            sTime.innerText = `${m}:${s<10?'0'+s:s} / ${dm}:${ds<10?'0'+ds:ds}`;
+        }
+    };
+    mainSeek.oninput = () => { audio.currentTime = mainSeek.value; };
+    audio.onended = playN;
+
+    // Lab Actions
+    document.getElementById('bc').oninput = (e) => { if(bassNode) bassNode.gain.value = e.target.value; document.getElementById('bv').innerText = e.target.value; };
+    document.getElementById('sc').oninput = (e) => { audio.playbackRate = e.target.value; document.getElementById('sv').innerText = e.target.value; };
+    document.getElementById('8dc').oninput = (e) => { document.getElementById('8dv').innerText = e.target.value > 0 ? 'ACTIVE' : 'OFF'; };
+    function setT(c) { document.documentElement.style.setProperty('--neon', c); }
+    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+    window.onresize = () => { cvs.width=window.innerWidth; cvs.height=window.innerHeight*0.7; };
+    window.onresize();
+</script>
+</body>
+</html>
