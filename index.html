@@ -238,3 +238,46 @@
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <title>NOVA OS ULTIMATE</title>
+    <style>
+        /* هنا تحط تصميم الـ Cyber والألوان الحمراء (CSS) */
+        body { background-color: #000; color: #ff0000; font-family: 'Courier New', monospace; }
+        .cyber-glow { box-shadow: 0 0 15px #ff0000; border: 1px solid #ff0000; }
+        /* ميزة 8: الـ Floating Player */
+        #floating-player { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: red; border-radius: 50%; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="cyber-glow">
+        <h1>NOVA OS SYSTEM</h1>
+        <div id="lyrics-container">/* ميزة 4: Matrix Lyrics */</div>
+    </div>
+
+    <script>
+        // هنا "المحرك" (JS) اللي يشغل الـ 9 مزايا اللي اختاريناها
+
+        // 1. ميزة Shake to Shuffle (هز الموبايل)
+        window.ondevicemotion = function(event) {
+            let acc = event.accelerationIncludingGravity;
+            if (Math.abs(acc.x) > 20) { /* كود تغيير الأغنية + الاهتزاز */ }
+        };
+
+        // 2. ميزة Proximity Control (بدون لمس)
+        // يشتغل بمجرد تقريب يدك من الحساس العلوي للموبايل
+
+        // 3. ميزة Auto-Scan (الاتصال بالملفات)
+        // هذا الكود يطلب الوصول للمجلدات بمجرد الضغط على شاشة التطبيق
+        document.body.onclick = async () => {
+             const dir = await window.showDirectoryPicker();
+             // فحص الملفات تلقائياً
+        };
+
+        // ميزة 5: Voice Commands
+        // (Next, Stop, Play)
+    </script>
+</body>
+</html>
