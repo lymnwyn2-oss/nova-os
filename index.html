@@ -10,7 +10,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Courier New', monospace; }
         body, html { margin: 0; padding: 0; height: 100vh; background: var(--bg); color: #fff; overflow: hidden; }
 
-        /* Grid Background v14 */
+        /* Grid Background */
         .grid { position: fixed; width: 200%; height: 200%; background-image: linear-gradient(var(--neon) 1px, transparent 1px), linear-gradient(90deg, var(--neon) 1px, transparent 1px); background-size: 45px 45px; opacity: 0.05; transform: perspective(500px) rotateX(60deg); z-index: -1; animation: gridAnim 10s linear infinite; }
         @keyframes gridAnim { from { transform: perspective(500px) rotateX(60deg) translateY(0); } to { transform: perspective(500px) rotateX(60deg) translateY(45px); } }
 
@@ -22,11 +22,13 @@
         .page.active { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Fixed Radial Visualizer (v18 Solution) */
+        /* Visualizer & Core */
         canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
         .core-circle { width: 130px; height: 130px; border: 5px solid var(--neon); border-radius: 50%; background: #000; z-index: 10; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px var(--neon); font-size: 1.6rem; font-weight: 900; transition: 0.1s; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
-        /* DB & LAB Panels (v17 Style) */
+        /* Matrix Lyrics Area */
+        #lyrics-container { position: absolute; top: 10%; width: 100%; text-align: center; color: var(--neon); font-size: 1rem; text-shadow: 0 0 5px var(--neon); z-index: 5; pointer-events: none; height: 100px; overflow: hidden; }
+
         .glass-box { width: 100%; height: 85%; background: var(--glass); border: 1px solid var(--neon); border-radius: 15px; overflow-y: auto; padding: 10px; }
         .track { padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
         .track.active { color: var(--neon); background: rgba(255,0,0,0.1); border-left: 4px solid var(--neon); }
@@ -35,11 +37,9 @@
         input[type=range] { -webkit-appearance: none; width: 100%; height: 5px; background: #333; margin-top: 10px; border-radius: 5px; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 10px var(--neon); cursor: pointer; }
 
-        /* Player Controls v17 (Seek Bar Fix) */
         .controls-panel { padding: 10px 20px; background: #000; border-top: 1px solid #222; z-index: 100; }
         .info-bar { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--neon); margin-bottom: 5px; font-weight: bold; }
         .seek-container { width: 100%; margin-bottom: 10px; }
-
         .btn-group { display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 5px; }
         .p-btn { background: none; border: none; color: #fff; font-size: 1.8rem; }
 
@@ -53,6 +53,7 @@
 <body>
 
 <div class="grid"></div>
+<div id="lyrics-container"></div>
 
 <div class="app">
     <header>
@@ -65,43 +66,22 @@
             <canvas id="cvs"></canvas>
             <div class="core-circle" id="node">NOVA</div>
         </div>
-
-        <div class="page" id="pg-db">
-            <div class="glass-box" id="list"></div>
-        </div>
-
+        <div class="page" id="pg-db"><div class="glass-box" id="list"></div></div>
         <div class="page" id="pg-lab" style="overflow-y:auto;">
-            <div class="lab-item">
-                <label>BASS_BOOST: <span id="bv">0</span>dB</label>
-                <input type="range" id="bc" min="0" max="35" value="0">
-            </div>
-            <div class="lab-item">
-                <label>SPEED: <span id="sv">1.0</span>x</label>
-                <input type="range" id="sc" min="0.5" max="2.0" step="0.1" value="1.0">
-            </div>
-            <div class="lab-item">
-                <label>8D_SURROUND: <span id="8dv">OFF</span></label>
-                <input type="range" id="8dc" min="0" max="1" step="0.1" value="0">
-            </div>
-            <div class="lab-item">
-                <label>THEMES:</label>
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <div onclick="setT('#ff0000')" style="background:#ff0000; width:40px; height:40px; border-radius:5px;"></div>
-                    <div onclick="setT('#00ff00')" style="background:#00ff00; width:40px; height:40px; border-radius:5px;"></div>
-                    <div onclick="setT('#0088ff')" style="background:#0088ff; width:40px; height:40px; border-radius:5px;"></div>
-                </div>
-            </div>
+            <div class="lab-item"><label>BASS_BOOST: <span id="bv">0</span>dB</label><input type="range" id="bc" min="0" max="35" value="0"></div>
+            <div class="lab-item"><label>SPEED: <span id="sv">1.0</span>x</label><input type="range" id="sc" min="0.5" max="2.0" step="0.1" value="1.0"></div>
+            <div class="lab-item"><label>8D_SURROUND: <span id="8dv">OFF</span></label><input type="range" id="8dc" min="0" max="1" step="0.1" value="0"></div>
+            <div class="lab-item"><label>THEMES:</label><div style="display:flex; gap:10px; margin-top:10px;">
+                <div onclick="setT('#ff0000')" style="background:#ff0000; width:40px; height:40px; border-radius:5px;"></div>
+                <div onclick="setT('#00ff00')" style="background:#00ff00; width:40px; height:40px; border-radius:5px;"></div>
+                <div onclick="setT('#0088ff')" style="background:#0088ff; width:40px; height:40px; border-radius:5px;"></div>
+            </div></div>
         </div>
     </div>
 
     <div class="controls-panel">
-        <div class="info-bar">
-            <span id="s-name">AWAITING_FILES_</span>
-            <span id="s-time">00:00 / 00:00</span>
-        </div>
-        <div class="seek-container">
-            <input type="range" id="main-seek" value="0" step="0.1">
-        </div>
+        <div class="info-bar"><span id="s-name">AWAITING_FILES_</span><span id="s-time">00:00 / 00:00</span></div>
+        <div class="seek-container"><input type="range" id="main-seek" value="0" step="0.1"></div>
         <div class="btn-group">
             <button class="p-btn" id="prev"><i class="fas fa-step-backward"></i></button>
             <button class="p-btn" id="play" style="font-size:2.5rem;"><i class="fas fa-play"></i></button>
@@ -114,7 +94,6 @@
         <button class="nav-i" data-p="pg-db"><i class="fas fa-database"></i><span>DB</span></button>
         <button class="nav-i" data-p="pg-lab"><i class="fas fa-flask"></i><span>LAB</span></button>
     </nav>
-
     <label class="add-fab"><i class="fas fa-plus"></i><input type="file" id="f-in" hidden multiple accept="audio/*"></label>
 </div>
 
@@ -126,18 +105,20 @@
     let audioCtx, analyser, source, dataArray, bassNode, pannerNode;
     let playlist = [], curIdx = 0, spatialDeg = 0;
 
-    // --- AI Voice ---
+    // --- ميزة 8: Voice Command (نوفا المطور) ---
     const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
     if(Rec){
         const rec = new Rec(); rec.continuous = true; rec.lang = 'ar-SA';
         rec.onresult = (e) => {
             const cmd = e.results[e.results.length-1][0].transcript;
-            if(cmd.includes("نوفا")) { const m = new SpeechSynthesisUtterance("نعم مطور علاوي"); m.lang='ar-SA'; window.speechSynthesis.speak(m); }
+            if(cmd.includes("نوفا")) { 
+                const m = new SpeechSynthesisUtterance("نعم مطور علاوي"); m.lang='ar-SA'; window.speechSynthesis.speak(m); 
+            }
         };
-        document.body.onclick = () => { try{rec.start()}catch(e){} };
+        document.body.addEventListener('click', () => { try{rec.start()}catch(e){} }, {once: true});
     }
 
-    // --- Shake ---
+    // --- ميزة 3: Shake to Shuffle ---
     let lastS = 0;
     window.addEventListener('devicemotion', (e) => {
         let acc = e.accelerationIncludingGravity;
@@ -188,18 +169,20 @@
         requestAnimationFrame(loop); if(!analyser) return;
         analyser.getByteFrequencyData(dataArray); ctx.clearRect(0,0,cvs.width,cvs.height);
         const b = dataArray[2]/255;
+        
+        // ميزة 2: Neural Glow التفاعل البصري
         node.style.transform = `translate(-50%, -50%) scale(${1 + b*0.35})`;
         node.style.boxShadow = `0 0 ${40 + b*80}px var(--neon)`;
+        document.querySelector('.grid').style.opacity = 0.05 + (b * 0.1);
 
         if(document.getElementById('8dc').value > 0){
             spatialDeg += 0.05; pannerNode.setPosition(Math.sin(spatialDeg)*5, 0, Math.cos(spatialDeg)*5);
         }
 
-        // --- RADIAL VISUALIZER FIX ---
         const cx = cvs.width/2, cy = cvs.height/2;
         ctx.beginPath(); ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--neon');
         ctx.lineWidth = 3;
-        for(let i=0; i<dataArray.length; i+=2){
+        for(let i=0; i<dataArray.length; i+=4){
             const angle = (i/dataArray.length) * Math.PI * 2;
             const r = 65 + b*10;
             const h = (dataArray[i]/255) * 80;
@@ -209,7 +192,7 @@
         ctx.stroke();
     }
 
-    // --- Controls ---
+    // --- Controls & Sleep Fade ---
     playBtn.onclick = () => { audio.paused?audio.play():audio.pause(); playBtn.innerHTML=audio.paused?'<i class="fas fa-play"></i>':'<i class="fas fa-pause"></i>'; };
     document.getElementById('next').onclick = playN;
     document.getElementById('prev').onclick = () => { curIdx > 0 ? playT(curIdx-1) : playT(playlist.length-1); };
@@ -231,53 +214,12 @@
     document.getElementById('bc').oninput = (e) => { if(bassNode) bassNode.gain.value = e.target.value; document.getElementById('bv').innerText = e.target.value; };
     document.getElementById('sc').oninput = (e) => { audio.playbackRate = e.target.value; document.getElementById('sv').innerText = e.target.value; };
     document.getElementById('8dc').oninput = (e) => { document.getElementById('8dv').innerText = e.target.value > 0 ? 'ACTIVE' : 'OFF'; };
+    
     function setT(c) { document.documentElement.style.setProperty('--neon', c); }
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-    window.onresize = () => { cvs.width=window.innerWidth; cvs.height=window.innerHeight*0.7; };
+    window.onresize = () => { cvs.width=window.innerWidth; cvs.height=window.innerHeight; };
     window.onresize();
 </script>
 </body>
-</html>
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-    <title>NOVA OS ULTIMATE</title>
-    <style>
-        /* هنا تحط تصميم الـ Cyber والألوان الحمراء (CSS) */
-        body { background-color: #000; color: #ff0000; font-family: 'Courier New', monospace; }
-        .cyber-glow { box-shadow: 0 0 15px #ff0000; border: 1px solid #ff0000; }
-        /* ميزة 8: الـ Floating Player */
-        #floating-player { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: red; border-radius: 50%; display: none; }
-    </style>
-</head>
-<body>
-
-    <div class="cyber-glow">
-        <h1>NOVA OS SYSTEM</h1>
-        <div id="lyrics-container">/* ميزة 4: Matrix Lyrics */</div>
-    </div>
-
-    <script>
-        // هنا "المحرك" (JS) اللي يشغل الـ 9 مزايا اللي اختاريناها
-
-        // 1. ميزة Shake to Shuffle (هز الموبايل)
-        window.ondevicemotion = function(event) {
-            let acc = event.accelerationIncludingGravity;
-            if (Math.abs(acc.x) > 20) { /* كود تغيير الأغنية + الاهتزاز */ }
-        };
-
-        // 2. ميزة Proximity Control (بدون لمس)
-        // يشتغل بمجرد تقريب يدك من الحساس العلوي للموبايل
-
-        // 3. ميزة Auto-Scan (الاتصال بالملفات)
-        // هذا الكود يطلب الوصول للمجلدات بمجرد الضغط على شاشة التطبيق
-        document.body.onclick = async () => {
-             const dir = await window.showDirectoryPicker();
-             // فحص الملفات تلقائياً
-        };
-
-        // ميزة 5: Voice Commands
-        // (Next, Stop, Play)
-    </script>
-</body>
-</html>
+    </html>
+    
